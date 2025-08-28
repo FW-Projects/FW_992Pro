@@ -1,0 +1,92 @@
+C51 COMPILER V9.60.7.0   DELAY                                                             08/28/2025 16:11:08 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE DELAY
+OBJECT MODULE PLACED IN .\Objects\delay.obj
+COMPILER INVOKED BY: D:\keil5C51\C51\BIN\C51.EXE base\delay.c LARGE OPTIMIZE(0,SPEED) BROWSE MODC2 INCDIR(.\app;.\base) 
+                    -DEBUG OBJECTEXTEND PRINT(.\Listings\delay.lst) OBJECT(.\Objects\delay.obj)
+
+line level    source
+
+   1          #include <intrins.h> // for _nop_
+   2          #include <absacc.h>
+   3          #include "delay.h"
+   4          #define uint8_t unsigned char
+   5          #define uint16_t unsigned int
+   6          
+   7          void Delay_10Us(void)
+   8          {
+   9   1              uint8_t i;
+  10   1              for (i = 0; i < 17; i++)
+  11   1              {
+  12   2                      _nop_();
+  13   2                      _nop_();
+  14   2                      _nop_();
+  15   2                      _nop_();
+  16   2              }
+  17   1      }
+  18          void Delay_X10Us(uint16_t Time) // 10us
+  19          {
+  20   1              uint8_t a;
+  21   1              for (a = 0; a < Time; a++)
+  22   1              {
+  23   2                      Delay_10Us();
+  24   2              }
+  25   1      }
+  26          //===========================================================
+  27          // Function name:       DelayMs
+  28          // parameters:          Time?????? ????Time ms
+  29          // returned value:      none
+  30          //===========================================================
+  31          //void Delay_Ms(uint16_t Time)
+  32          //{
+  33          //      uint16_t a;
+  34          //      uint8_t b;
+  35          //      for (a = 0; a < Time; a++)
+  36          //      {
+  37          //              for (b = 0; b < 98; b++)
+  38          //              {
+  39          //                      Delay_10Us();
+  40          //              }
+  41          //      }
+  42          //}
+  43          //===========================================================
+  44          // Function name:       DelayS
+  45          // parameters:          Time?????? ????Time S
+  46          // returned value:      none
+  47          //===========================================================
+  48          //void Delay_S(uint16_t Time)
+  49          //{
+  50          //      uint16_t a, b;
+  51          //      for (a = 0; a < Time; a++)
+  52          //      {
+  53          //              for (b = 0; b < 10; b++)
+  54          //              {
+C51 COMPILER V9.60.7.0   DELAY                                                             08/28/2025 16:11:08 PAGE 2   
+
+  55          //                      Delay_Ms(100);
+  56          //              }
+  57          //      }
+  58          //}
+  59          
+  60          //void delay_us(uint16_t xms)
+  61          //{
+  62          //      uint16_t i, j;
+  63          //      for (i = xms; i > 0; i--)
+  64          //              for (j = 10; j > 0; j--)
+  65          //                      ;
+  66          //}
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     70    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      4    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

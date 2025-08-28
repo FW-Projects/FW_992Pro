@@ -1,0 +1,62 @@
+C51 COMPILER V9.60.7.0   ISP                                                               08/28/2025 16:11:08 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE ISP
+OBJECT MODULE PLACED IN .\Objects\ISP.obj
+COMPILER INVOKED BY: D:\keil5C51\C51\BIN\C51.EXE base\ISP.c LARGE OPTIMIZE(0,SPEED) BROWSE MODC2 INCDIR(.\app;.\base) DE
+                    -BUG OBJECTEXTEND PRINT(.\Listings\ISP.lst) OBJECT(.\Objects\ISP.obj)
+
+line level    source
+
+   1          #include "ISP.h"
+   2          #include <intrins.h> // for _nop_
+   3          #include <absacc.h>      // for CBYTE
+   4          #define L_ISP_ADDR 0x3fc0
+   5          idata uint16_t r_read_rom_addr = L_ISP_ADDR;
+   6          idata uint8_t u8_data[32] = {0}; // 需写Flash的数据
+   7          // void ISPinit(void)
+   8          //{
+   9          //      uint8_t i = 0;
+  10          //      for(i=0;i<32;i++)
+  11          //      {
+  12          //              u8_data[i] = i;
+  13          //      }
+  14          // }
+  15          
+  16          //====================================================================================================//
+  17          // 写ISP
+  18          //====================================================================================================//
+  19          void ISPpagewrite(uint8_t *r_ram_address) // 写
+  20          {
+  21   1              WDTR = 0x5a;
+  22   1              PERAM = (uint8_t)r_ram_address; // 数据缓存器(IRAM)的第一个地址F
+  23   1              PEROMH = L_ISP_ADDR >> 8;               // 页编程(IROM)的第一个地址(15bit-8bit)
+  24   1              PEROML = (L_ISP_ADDR & 0x00f0); // 页编程(IROM)的第一个地址(7bit-5bit)
+  25   1              EAL = 0;                                                //???                               全局中断    //清狗
+  26   1              PEROML |= 0x0a;                                 // 开始ISP操作
+  27   1              PECMD = 0x5a;                                   // 开始ISP操作
+  28   1              EAL = 1;                                                //???                                全局中断
+  29   1      }
+  30          
+  31          void ISPpageread2(void) // 读
+  32          {
+  33   1              uint8_t i = 0;
+  34   1              for (i = 0; i < 32; i++)
+  35   1              {
+  36   2                      u8_data[i] = CBYTE[r_read_rom_addr++];
+  37   2              }
+  38   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     98    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      4    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =     34    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

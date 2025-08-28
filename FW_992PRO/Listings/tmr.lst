@@ -1,0 +1,239 @@
+C51 COMPILER V9.60.7.0   TMR                                                               08/28/2025 16:11:08 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TMR
+OBJECT MODULE PLACED IN .\Objects\tmr.obj
+COMPILER INVOKED BY: D:\keil5C51\C51\BIN\C51.EXE base\tmr.c LARGE OPTIMIZE(0,SPEED) BROWSE MODC2 INCDIR(.\app;.\base) DE
+                    -BUG OBJECTEXTEND PRINT(.\Listings\tmr.lst) OBJECT(.\Objects\tmr.obj)
+
+line level    source
+
+   1          #include "SN8F5708.H"
+   2          #include "tmr.h"
+   3          #include "definition.h"
+   4          #include "lcd.h"
+   5          /*  T0 tmr  */
+   6          #define T0Mode0     0 << 0    //T0 mode0,13bit counter
+   7          #define T0Mode1     1 << 0    //T0 mode1,16bit counter
+   8          #define T0Mode2     2 << 0    //T0 mode2,8bit auto-reload counter
+   9          #define T0Mode3     3 << 0    //T0 mode3,T0 two 8bit counter / T1 no flag
+  10          #define T0Gate      8 << 0    //T0 gating clock by INT0
+  11          #define T0ClkFcpu   0 << 0    //T0 clock source from Fcpu / 12
+  12          #define T0ClkExt    4 << 0    //T0 clock source from Fosc or FRTC
+  13          #define T0ExtFosc   0 << 4    //T0 clock source from Fosc
+  14          #define T0ExtFRTC   8 << 4    //T0 clock source from FRTC
+  15          
+  16          
+  17          /*  T1 tmr  */
+  18          #define T1Mode0     0 << 4    //T1 mode0,13bit counter
+  19          #define T1Mode1     1 << 4    //T1 mode1,16bit counter
+  20          #define T1Mode2     2 << 4    //T1 mode2,8bit auto-reload counter
+  21          #define T1Mode3     3 << 4    //T1 mode3,T1 stop
+  22          #define T1Gate      8 << 4    //T1 gating clock by INT1
+  23          #define T1ClkFcpu   0 << 4    //T1 clock source from Fcpu / 12
+  24          #define T1ExtFosc   4 << 4    //T1 clock source from Fosc
+  25          
+  26          
+  27          sbit COM0 = P1 ^ 2; // COM0
+  28          sbit COM1 = P1 ^ 1; // COM1
+  29          sbit COM2 = P1 ^ 0; // COM2
+  30          sbit COM3 = P1 ^ 5; // COM3
+  31          sbit COM4 = P1 ^ 4; // COM4
+  32          sbit COM5 = P1 ^ 3; // COM5
+  33          sbit COM6 = P1 ^ 6;   // COM6
+  34          sbit COM7 = P1 ^ 7;   // COM7
+  35          
+  36          void InitT0(void)
+  37          {
+  38   1              //T0 Initial 从0x00开始计数
+  39   1              TH0 = 0x00;
+  40   1              TL0 = 0x00;
+  41   1              
+  42   1              //T0 mode1,16bit counter & Fcpu/12
+  43   1              TMOD |= T0Mode1 | T0ClkFcpu;
+  44   1              
+  45   1              //T0 enable & Clear TF0
+  46   1              TR0 = 1;
+  47   1              TF0 = 0;
+  48   1              
+  49   1              //enable T0 interrupt
+  50   1              ET0 = 1;
+  51   1              //enable total interrupt
+  52   1              EAL = 1;
+  53   1              
+  54   1      }
+C51 COMPILER V9.60.7.0   TMR                                                               08/28/2025 16:11:08 PAGE 2   
+
+  55          
+  56          //void InitT1(void)
+  57          //{     
+  58          //      //T1 mode1,16bit counter & Fcpu/12
+  59          //      TMOD |= T1Mode1 | T1ClkFcpu;
+  60          //      
+  61          //      //T1 enable & Clear TF0
+  62          //      TR1 = 1;
+  63          //      TF1 = 0;
+  64          
+  65          //      //从初值55536开始计数
+  66          //      TH1 = (65536 - 10000) / 256;
+  67          //      TL1 = (65536 - 10000) % 256;
+  68          
+  69          //      //低优先级
+  70          //      IP0 &= ~(1 << 3);
+  71          //      IP1 &= ~(1 << 3);
+  72          //      
+  73          //      //enable T1 interrupt
+  74          //      ET1 = 1;
+  75          //      //enable total interrupt
+  76          //      EAL = 1;
+  77          //}
+  78          
+  79          
+  80          
+  81          
+  82          //void StartT0(void)
+  83          //{
+  84          //      TR0 = 1;
+  85          //      ET0 = 1;
+  86          //}
+  87          
+  88          //void StopT0(void)
+  89          //{
+  90          //      TR0 = 0;
+  91          //      ET0 = 0;
+  92          //}
+  93          
+  94          
+  95          /*  T0 interrupt service routine  */
+  96          void T0_ISR(void) interrupt 1
+  97          {
+  98   1              COM0 = 1;
+  99   1              COM1 = 1;
+ 100   1              COM2 = 1;
+ 101   1              COM3 = 1;
+ 102   1              COM4 = 1;
+ 103   1              COM5 = 1;
+ 104   1              COM6 = 1;
+ 105   1              COM7 = 1;
+ 106   1              switch (Disp_Com) // 显示扫描
+ 107   1              {
+ 108   2              case 1:
+ 109   2                      led_out(Sol_bai);
+ 110   2                      COM0 = 0;
+ 111   2                      break;
+ 112   2              case 2:
+ 113   2                      led_out(Sol_shi);
+ 114   2                      COM1 = 0;
+ 115   2                      break;
+ 116   2              case 3:
+C51 COMPILER V9.60.7.0   TMR                                                               08/28/2025 16:11:08 PAGE 3   
+
+ 117   2                      led_out(Sol_ge);
+ 118   2                      COM2 = 0;
+ 119   2                      break;
+ 120   2              case 4:
+ 121   2                      led_out(Air_bai);
+ 122   2                      COM3 = 0;
+ 123   2                      break;
+ 124   2              case 5:
+ 125   2                      led_out(Air_shi);
+ 126   2                      COM4 = 0;
+ 127   2                      break;
+ 128   2              case 6:
+ 129   2                      led_out(Air_ge);
+ 130   2                      COM5 = 0;
+ 131   2                      break;
+ 132   2              case 7:
+ 133   2                      led_out(Air_speed_shi);
+ 134   2                      COM6 = 0;
+ 135   2                      break;
+ 136   2              case 8:
+ 137   2                      led_out(Air_speed_ge);
+ 138   2                      COM7 = 0;
+ 139   2                      Disp_Com = 0;
+ 140   2                      break;
+ 141   2              default:Disp_Com = 0;
+ 142   2                      break;
+ 143   2              }
+ 144   1              Disp_Com++;
+ 145   1              if (Sol_Sleep_Ready_Flag == on)
+ 146   1              {
+ 147   2                      if(Sol_Sleep_Time != 0x00)
+ 148   2                      {
+ 149   3                              if(Cycle_sleep_time != 0x00)
+ 150   3                                      Cycle_sleep_time--;
+ 151   3                              else
+ 152   3                              {
+ 153   4                                      Cycle_sleep_time = 0x7B56;
+ 154   4                                      Sol_Sleep_Time--;
+ 155   4                              }       
+ 156   3                      }
+ 157   2                      else
+ 158   2                              Sol_Sleep_Time = 0x00;
+ 159   2              }
+ 160   1      //      else{
+ 161   1      //              Sol_Sleep_Time = set_sleep_time;
+ 162   1      //              Cycle_sleep_time = 0x7B56;
+ 163   1      //      }
+ 164   1              if (Time_colck_1 == 0x00)
+ 165   1              {
+ 166   2                      if(Cycle_Times_Error != 0x00)
+ 167   2                              Cycle_Times_Error--;
+ 168   2                      if(Cycle_Times_Disp_Air != 0x00)
+ 169   2                              Cycle_Times_Disp_Air--;
+ 170   2                      if(Cycle_Times_Disp_Sol != 0x00)
+ 171   2                              Cycle_Times_Disp_Sol--;
+ 172   2                      if(Ec_End_Times != 0x00)
+ 173   2                              Ec_End_Times--;
+ 174   2                      if(key_out_time != 0x00)
+ 175   2                              key_out_time--;
+ 176   2                      if(init_outtime != 0x00)
+ 177   2                              init_outtime--;
+ 178   2                      if (flicker_time != 0)
+C51 COMPILER V9.60.7.0   TMR                                                               08/28/2025 16:11:08 PAGE 4   
+
+ 179   2                              flicker_time--;
+ 180   2                      else
+ 181   2                      {
+ 182   3                              ss_flag = !ss_flag;
+ 183   3                              P_ss_flag = !P_ss_flag;
+ 184   3                              flicker_time = 0x0a;
+ 185   3                      }
+ 186   2                      
+ 187   2                      Time_colck_1 = 26;
+ 188   2              }
+ 189   1              else
+ 190   1                      Time_colck_1--;
+ 191   1              if (Key_Cycle_Times != 0)
+ 192   1                      Key_Cycle_Times--;
+ 193   1              if(Ec_Cycle_Times != 0x00)
+ 194   1                      Ec_Cycle_Times--;
+ 195   1              TF0 = 0; // Clear TF0
+ 196   1              TH0 = (65536 - 5000) / 256;
+ 197   1              TL0 = (65536 - 5000) % 256;
+ 198   1              EAL = 1;
+ 199   1              ET0 = 1;
+ 200   1              TR0 = 1;
+ 201   1      }
+ 202          
+ 203          /*  T1 interrupt service routine  */
+ 204          void T1_ISR(void) interrupt 3
+ 205          {
+ 206   1              TF1 = 0; // Clear TF1
+ 207   1              TH1 = (65536 - 10000) / 256;
+ 208   1              TL1 = (65536 - 10000) % 256;
+ 209   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    463    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

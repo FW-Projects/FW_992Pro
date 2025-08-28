@@ -1,0 +1,116 @@
+C51 COMPILER V9.60.7.0   ADZH_10                                                           08/28/2025 16:11:08 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE ADZH_10
+OBJECT MODULE PLACED IN .\Objects\adzh_10.obj
+COMPILER INVOKED BY: D:\keil5C51\C51\BIN\C51.EXE base\adzh_10.c LARGE OPTIMIZE(0,SPEED) BROWSE MODC2 INCDIR(.\app;.\base
+                    -) DEBUG OBJECTEXTEND PRINT(.\Listings\adzh_10.lst) OBJECT(.\Objects\adzh_10.obj)
+
+line level    source
+
+   1          #include <stdio.h>
+   2          #include <SN8F5708.H>
+   3          #include <adzh_10.h>
+   4          #define ADCEn 0x80
+   5          #define EADC (0 << 3) // 关闭ADC中断
+   6          #define ADCStart 0xc0
+   7          #define ad_flag 0x50
+   8          #define ClearEOC 0x8f
+   9          #define uint8_t unsigned char
+  10          #define uint16_t unsigned int
+  11          uint16_t AD_Buffer_Array[10] = {0};
+  12          uint16_t ADCBuffer = 0x0000;
+  13          uint16_t ad10_data[10] = {0};
+  14          uint16_t ADC_S(void);
+  15          
+  16          uint16_t ADC_S(void)
+  17          {
+  18   1              uint16_t ADCBuffer = 0;
+  19   1              ADM |= ADCStart; // 转换开始
+  20   1              while (ADM & ad_flag)
+  21   1                      ; // 等待结束
+  22   1              ADCBuffer = (ADB << 4) + (ADR & 0x0F);
+  23   1              ADCBuffer >>= 2;
+  24   1              ADM &= ClearEOC;
+  25   1              return (ADCBuffer);
+  26   1      }
+  27          
+  28          //void ADC_Getvalue(uint8_t inp_n)
+  29          //{
+  30          //      uint8_t adn = 0;
+  31          //      ADM = ADCEn | inp_n;
+  32          //      ADR = 0x60;       // 4M   00 = Fosc/16;01 = Fosc/8;10 = Fosc/1;11 = Fosc/2?
+  33          //      VREFH = 0x07; ///*IEN0 |= 0x80; //enable global interrupt*/
+  34          //      IEN2 |= EADC; // 关闭中断ad
+  35          //      for (adn = 0; adn < 10; adn++)
+  36          //              ad10_data[adn] = ADC_S();
+  37          //}
+  38          
+  39          //uint16_t ADC_Average_Value(void) // 10次ＡＤ求平均值
+  40          //{
+  41          //      uint8_t adn = 0;
+  42          //      uint16_t ADC_Data_Sum = 0x0000;
+  43          //      uint16_t Array_data;
+  44          //      uint16_t Max_Buffer = 0x0000;
+  45          //      uint16_t Min_Buffer = 0xffff;
+  46          //      for (adn = 0; adn < 10; adn++)
+  47          //      {
+  48          //              Array_data = ad10_data[adn];
+  49          //              if (Max_Buffer < Array_data)
+  50          //                      Max_Buffer = Array_data; // 求最大
+  51          //              if (Min_Buffer > Array_data)
+  52          //                      Min_Buffer = Array_data; // 求最小
+  53          //              ADC_Data_Sum += Array_data;
+  54          //      }
+C51 COMPILER V9.60.7.0   ADZH_10                                                           08/28/2025 16:11:08 PAGE 2   
+
+  55          //      ADC_Data_Sum = (ADC_Data_Sum - Max_Buffer - Min_Buffer) / 8; // 去掉最大值，去掉最小值，求平均  /8
+  56          //      return (ADC_Data_Sum);                                                                           // 返回平均值
+  57          //}
+  58          
+  59          // uint16_t adc_value_10(uint8_t inp_n)
+  60          //{
+  61          //      uint16_t Out_AD_Buffer;
+  62          //      ADC_Getvalue(inp_n);
+  63          //      Out_AD_Buffer=ADC_Average_Value();
+  64          //      return(Out_AD_Buffer);
+  65          // }
+  66          uint16_t adc_value_10(uint8_t inp_n) // 10次ＡＤ求平均值
+  67          {
+  68   1              uint16_t adn = 0;
+  69   1              uint16_t sum = 0;
+  70   1              uint16_t min = 0xffff;
+  71   1              uint16_t max = 0;
+  72   1              uint16_t av_data = 0;
+  73   1              uint16_t AD_data[10]; // 定义无符号整形数组
+  74   1              ADM = ADCEn | inp_n;
+  75   1              ADR = 0x60;       // 4M   00 = Fosc/16;01 = Fosc/8;10 = Fosc/1;11 = Fosc/2?
+  76   1              VREFH = 0x07; ///*IEN0 |= 0x80; //enable global interrupt*/
+  77   1              IEN2 |= EADC; // 关闭中断ad
+  78   1              for (adn = 0; adn < 10; adn++)
+  79   1              {
+  80   2                      AD_data[adn] = ADC_S(); // 调用AD转换并赋值
+  81   2                      if (max < AD_data[adn])
+  82   2                              max = AD_data[adn]; // 求最大
+  83   2                      if (min > AD_data[adn])
+  84   2                              min = AD_data[adn]; // 求最小
+  85   2                      sum += AD_data[adn];    // 求和
+  86   2              }
+  87   1              ADM &= ClearEOC;
+  88   1              av_data = (sum - min - max) / 8; // 去掉最大值，去掉最小值，求平均
+  89   1              return (av_data);                                // 返回平均值
+  90   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    476    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     75    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

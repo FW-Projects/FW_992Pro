@@ -1,0 +1,18 @@
+".\Objects\STARTUP.obj",
+".\Objects\OPTIONS_SN8F5708.obj",
+".\Objects\main.obj",
+".\Objects\PID_operation.obj",
+".\Objects\lcd.obj",
+".\Objects\definition.obj",
+".\Objects\adzh_10.obj",
+".\Objects\getkey.obj",
+".\Objects\ISP.obj",
+".\Objects\delay.obj",
+".\Objects\tmr.obj",
+".\Objects\gpio.obj",
+".\Objects\PWM.obj",
+".\Objects\EC11.obj" 
+TO ".\Objects\FW_992Pro" 
+PRINT(".\Listings\FW_992Pro.m51") RAMSIZE(256) 
+CODE( 0X0000-0X3FF5 )
+XDATA( 0X0000-0X03FF )

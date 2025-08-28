@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "pid_operation.h": "c",
+        "definition.h": "c"
+    }
+}

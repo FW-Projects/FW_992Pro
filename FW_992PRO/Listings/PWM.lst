@@ -1,0 +1,166 @@
+C51 COMPILER V9.60.7.0   PWM                                                               08/28/2025 16:11:08 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE PWM
+OBJECT MODULE PLACED IN .\Objects\PWM.obj
+COMPILER INVOKED BY: D:\keil5C51\C51\BIN\C51.EXE base\PWM.c LARGE OPTIMIZE(0,SPEED) BROWSE MODC2 INCDIR(.\app;.\base) DE
+                    -BUG OBJECTEXTEND PRINT(.\Listings\PWM.lst) OBJECT(.\Objects\PWM.obj)
+
+line level    source
+
+   1          #include <SN8F5708.H>
+   2          #include "PWM.h"
+   3          #include "definition.h"
+   4          
+   5          void PWM1_Init(void) 
+   6          {
+   7   1              PW1M |= 0x80;
+   8   1              PW1YH = 0x13; // 5000
+   9   1              PW1YL = 0x88; // set PW1 16位周期控制位  周期为40mS /5000份
+  10   1              PW1DH = 0x00;
+  11   1              PW1DL = 0x00; // set PWM 16位占空比控制位
+  12   1              PW1A = 0x00;  // A point dead band control
+  13   1              PW1BH = PW1DH;
+  14   1              PW1BL = PW1DL; // B point dead band control/死区控制位
+  15   1      }
+  16          
+  17          void PWM2_Init(void)
+  18          {
+  19   1              PW2M |= 0x80;
+  20   1              PW2YH = 0x13; // 5000
+  21   1              PW2YL = 0x88; // set PW1 16位周期控制位  周期为40mS /5000份
+  22   1              PW2DH = 0x00;
+  23   1              PW2DL = 0x00; // set PWM 16位占空比控制位
+  24   1              PW2A = 0x00;  // A point dead band control
+  25   1              PW2BH = PW2DH;
+  26   1              PW2BL = PW2DL; // B point dead band control/死区控制位
+  27   1      }
+  28          
+  29          void PWM3_init(void) /// ，
+  30          {
+  31   1              PW3M |= 0x20;      //  0xe0=Fhosc/1 0xc0=Fhosc/2 0xa0=Fhosc/4 0x80=Fhosc/8 0x60=Fhosc/16 0x40=Fhosc/32  x20
+             -=Fhosc/64 0x000=Fhosc/128频率选择,
+  32   1              PW3M &= ~(1 << 3); // WM11 outputs is an inverse signal of pwm正常和反相输出控制位
+  33   1              PW3M |= 1 << 1;    // enable PWM10 output (PWCH10) 引脚选择PWM31，PWM30 ?
+  34   1      
+  35   1              PW3YH = 0x00;
+  36   1              PW3YL = 0xff; // set PW1 16位周期控制位  周期为256份
+  37   1      
+  38   1              PW3DH = 0x00;
+  39   1              PW3DL = 0x80; // set PWM 16位占空比控制位
+  40   1      
+  41   1              // the dead band control : B point > A point (Must)
+  42   1              PW3BH = PW3DH;
+  43   1              PW3BL = PW3DL; // B point dead band control/死区控制位
+  44   1      
+  45   1              PW3A = 0x00;  // A point dead band control
+  46   1              P1OC |= 0x80; // 使能PWM3
+  47   1      }
+  48          
+  49          void PWM1_out(uint16_t PWM1_d)
+  50          {
+  51   1              PW1DL = PWM1_d; // B point dead band control
+  52   1              PW1BL = PW1DL;
+  53   1              PW1DH = PWM1_d >> 8;
+C51 COMPILER V9.60.7.0   PWM                                                               08/28/2025 16:11:08 PAGE 2   
+
+  54   1              PW1BH = PW1DH;
+  55   1      }
+  56          
+  57          void PWM2_out(uint16_t PWM2_d)
+  58          {
+  59   1              PW2DL = PWM2_d; // B point dead band control
+  60   1              PW2BL = PWM2_d;
+  61   1              PW2DH = PWM2_d >> 8;
+  62   1              PW2BH = PW2DH;
+  63   1      }
+  64          
+  65          void PWM3_out(uint16_t PWM3_d)
+  66          {  
+  67   1              PW3DL = PWM3_d;         // B point dead band control
+  68   1              PW3BL = PWM3_d;
+  69   1              PW3DH = PWM3_d>>8;
+  70   1              PW3BH = PW3DH;
+  71   1      }
+  72          
+  73          void PWM1_Off(void) // 关闭PWM1通道
+  74          {
+  75   1              IEN4 &= 0x77;
+  76   1              P1OC &= ~(1 << 5); // 关闭PWM1
+  77   1              PW1M &= ~(3 << 1); // 关闭 两通道PWM
+  78   1              P46 = 0;
+  79   1      }
+  80          
+  81          void PWM2_Off(void) // 关闭PWM2通道
+  82          {
+  83   1              IEN2 &= ~(1 << 1);       // 禁止PWM2中断控制位
+  84   1              IRCON2 &= ~(1 << 0); // 清中断
+  85   1              P1OC &= ~(1 << 6);       // 关闭PWM2
+  86   1              PW2M &= ~(3 << 1);       // 关闭 两通道PWM
+  87   1              P50 = 0;
+  88   1      }
+  89          
+  90          void PWM_ALL_OFF(void)
+  91          {
+  92   1              PWM1_Off();
+  93   1              PWM2_Off();
+  94   1      }
+  95          
+  96          void PWM1_Open(void)
+  97          {
+  98   1              PW1M &= 0xf0;
+  99   1              PW1M &= ~(1 << 3);//正向输出
+ 100   1              PW1M |= (1 << 1);
+ 101   1              P1OC |= 1 << 5; // 开启PWM1
+ 102   1              IEN4 &= ~(1 << 3);
+ 103   1              IEN4 |= (1 << 7);
+ 104   1      }
+ 105          
+ 106          void PWM2_Open(void)
+ 107          {
+ 108   1              PW2M &= 0xf0;
+ 109   1              PW2M &= ~(1 << 3);   //正向输出
+ 110   1              PW2M |= 1 << 1;
+ 111   1              P1OC |= 1 << 6;          // 开启PWM2
+ 112   1              IEN2 |= 1 << 1;          // 使能PWM2中断控制位
+ 113   1              IRCON2 &= ~(1 << 0); // 清中断
+ 114   1      }
+ 115          
+C51 COMPILER V9.60.7.0   PWM                                                               08/28/2025 16:11:08 PAGE 3   
+
+ 116          void PWM_ALL_OPEN(void)
+ 117          {
+ 118   1              PWM1_Open();
+ 119   1              PWM2_Open();
+ 120   1      }
+ 121          
+ 122          void PWM1_ISR(void) interrupt ISRPwm1 // air_hot control
+ 123          {
+ 124   1              if (Sol_PID_Cycle_Time != 0)
+ 125   1                      Sol_PID_Cycle_Time--;
+ 126   1              PWM1_out(Sol_pid_outdata);
+ 127   1              
+ 128   1              IEN4 &= ~(1 << 3); // 清中断 (PWM1F)
+ 129   1      }
+ 130          
+ 131          void PWM2_ISR(void) interrupt ISRPwm2 // sol_hot control
+ 132          {
+ 133   1              if (Air_PID_Cycle_Time != 0)
+ 134   1                      Air_PID_Cycle_Time--;
+ 135   1              PWM2_out(Air_pid_outdata);
+ 136   1              IRCON2 &= ~(1 << 0); // 清中断 (PWM2F)
+ 137   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    426    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      6    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
